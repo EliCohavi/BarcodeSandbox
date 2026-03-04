@@ -1,0 +1,103 @@
+﻿@rendermode InteractiveServer
+
+<h3>Barcode Navigation Sandbox</h3>
+
+<button class="btn btn-primary" @onclick="HandleClick">@buttonText</button>
+
+<p>Listening: @IsDetecting</p>
+<p>Collected Input: @DetectionString</p>
+
+@code {
+    private bool IsDetecting = false;
+    private string DetectionString = "";
+
+    [Inject] IJSRuntime JS { get; set; } = default!;
+    [Inject] NavigationManager Nav { get; set; } = default!;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initKeyListener",
+                DotNetObjectReference.Create(this));
+        }
+    }
+
+    [JSInvokable]
+    public void ReceiveKey(string key)
+    {
+        // Start listening on =
+        if (!IsDetecting && key == "=")
+        {
+            IsDetecting = true;
+            DetectionString = "";
+            StateHasChanged();
+            return;
+        }
+
+        if (IsDetecting)
+        {
+            if (key == "Enter")
+            {
+                Console.WriteLine(DetectionString);
+
+                // Navigate based on collected input
+                switch (DetectionString)
+                {
+                    case "*JHWEB40.LIT.40630*":
+                        Nav.NavigateTo("/1");
+                        break;
+                    case "*JHWEB40.LIT.40631*":
+                        Nav.NavigateTo("/2");
+                        break;
+
+                        //=*JHWEB40.LIT.40630*
+                        //=*JHWEB40.LIT.40631*
+                }
+                // Reset
+                IsDetecting = false;
+                DetectionString = "";
+                StateHasChanged();
+            }
+            else
+            {
+                // Only append real characters
+                if (key.Length == 1)
+                {
+                    DetectionString += key;
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+
+
+    // scan button logic
+    private string buttonText = "Scan";
+    private bool isScanning = false;
+
+    private void HandleClick()
+    {
+        ToggleStatus();
+        StartScan();
+    }
+
+    private void ToggleStatus()
+    {
+        isScanning = !isScanning;
+
+        if (isScanning)
+        {
+            buttonText = "Scanning";
+        }
+        else
+        {
+            buttonText = "Scan";
+        }
+    }
+
+    private void StartScan()
+    {
+
+    }
+}

@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <base href="/" />
+    <HeadOutlet />
+</head>
+<body>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" />
+        </Found>
+        <NotFound>
+            <p>Page not found</p>
+        </NotFound>
+    </Router>
+
+    <!-- Sandbox JS listener -->
+    <Sandbox />
+
+    <script src="scanner.js"></script>
+    <script src="_framework/blazor.web.js"></script>
+</body>
+</html>
