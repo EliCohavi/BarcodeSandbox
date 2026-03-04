@@ -14,14 +14,7 @@
     [Inject] IJSRuntime JS { get; set; } = default!;
     [Inject] NavigationManager Nav { get; set; } = default!;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("initKeyListener",
-                DotNetObjectReference.Create(this));
-        }
-    }
+    // The JS key listener is started/stopped when the Scan button is toggled.
 
     [JSInvokable]
     public void ReceiveKey(string key)
@@ -75,11 +68,25 @@
     // scan button logic
     private string buttonText = "Scan";
     private bool isScanning = false;
+    private DotNetObjectReference<Sandbox>? dotNetRef;
 
-    private void HandleClick()
+    private async Task HandleClick()
     {
         ToggleStatus();
-        StartScan();
+
+        if (isScanning)
+        {
+            // start JS key listener and pass a DotNet reference
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("startKeyListener", dotNetRef);
+        }
+        else
+        {
+            // stop JS key listener and dispose the reference
+            await JS.InvokeVoidAsync("stopKeyListener");
+            dotNetRef?.Dispose();
+            dotNetRef = null;
+        }
     }
 
     private void ToggleStatus()
@@ -94,10 +101,5 @@
         {
             buttonText = "Scan";
         }
-    }
-
-    private void StartScan()
-    {
-
     }
 }
