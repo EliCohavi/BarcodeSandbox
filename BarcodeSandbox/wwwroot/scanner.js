@@ -26,3 +26,7 @@ window.stopKeyListener = function () {
     // clear stored reference
     window._barcodeKeyListener.dotNetRef = null;
 };
+
+window.blurElement = (el) => {
+    if (el) el.blur();
+};

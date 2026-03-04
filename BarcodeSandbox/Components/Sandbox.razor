@@ -2,7 +2,7 @@
 
 <h3>Barcode Navigation Sandbox</h3>
 
-<button class="btn btn-primary" @onclick="HandleClick">@buttonText</button>
+<button class="btn btn-primary" @onclick="HandleClick" @ref="scanButton">@buttonText</button>
 
 <p>Listening: @IsDetecting</p>
 <p>Collected Input: @DetectionString</p>
@@ -10,6 +10,7 @@
 @code {
     private bool IsDetecting = false;
     private string DetectionString = "";
+    private ElementReference scanButton;
 
     [Inject] IJSRuntime JS { get; set; } = default!;
     [Inject] NavigationManager Nav { get; set; } = default!;
@@ -51,6 +52,9 @@
                 IsDetecting = false;
                 DetectionString = "";
                 StateHasChanged();
+
+                // Remove focus from the button so ENTER doesn't trigger it again
+                _ = JS.InvokeVoidAsync("blurElement", scanButton);
             }
             else
             {
@@ -63,7 +67,6 @@
             }
         }
     }
-
 
     // scan button logic
     private string buttonText = "Scan";
